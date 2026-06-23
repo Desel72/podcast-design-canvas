@@ -35,6 +35,16 @@ Creators should be able to compare:
 
 The comparison should use visual preview where possible.
 
+## Flow Connections
+
+Version history should stay connected to the creative workflows that produce episode-level decisions:
+
+- template apply and divergence states from `docs/show-template-adaptation.md`
+- review-copy milestones and resolved feedback from `docs/client-review-copy-flow.md`
+- export warning changes before final handoff from `docs/export-package-handoff.md`
+
+The product should show creator-meaningful checkpoints from these flows, not raw autosave noise or background processing logs.
+
 ## Restore Behavior
 
 Restoring a version should explain what will change:

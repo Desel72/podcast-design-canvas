@@ -45,6 +45,8 @@ Keep review status simple:
 
 Resolved feedback should remain available for context but should not keep blocking the final export.
 
+Review-copy creation, reviewer decisions, and marked fixes should remain visible in `docs/episode-version-history.md` as creator-meaningful milestones, so teams can understand what changed between review rounds without reopening every comment thread.
+
 Unresolved feedback that would affect the chosen export destination should surface in `docs/export-readiness-review.md` Review Copy Warnings.
 
 ## Agency Fit

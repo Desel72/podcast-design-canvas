@@ -51,7 +51,7 @@ Template edits should avoid surprising users:
 - update this template for future episodes
 - apply changes only to the current episode
 
-Creators should be able to see when an episode has diverged from its original template.
+Creators should be able to see when an episode has diverged from its original template. Those episode-versus-template differences should also stay understandable in `docs/episode-version-history.md`, so a creator can compare template application, later layout edits, and episode-only overrides before restoring anything.
 
 ## Maintainer Acceptance Notes
 
