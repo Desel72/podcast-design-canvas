@@ -47,3 +47,17 @@ Visual match adjustments should apply before the preset style layer so that bran
 Source media issues that affect individual tracks before matching should surface in `docs/source-media-health.md` Health Checks. When source health detects a cross-speaker mismatch rather than a single damaged track, it should route the creator here instead of treating the issue as isolated media cleanup.
 
 If the creator continues into layout editing, the corrected match should remain visible in `docs/canvas-layer-controls.md` Preview Guardrails so framing and brand decisions are judged against the harmonized speaker look rather than the untreated recordings.
+
+## Preview Contexts
+
+Creators should judge visual matching on the episode moments where mismatches are easiest to notice:
+
+- all speaker thumbnails lined up side by side
+- a host-and-guest split screen
+- a solo close-up of the speaker being adjusted
+- the match shown under the chosen preset with brand colors and lower-thirds
+- a darker or backlit moment in one speaker's track
+
+Compare the adjusted speaker against at least one other participant in the same view, and keep the chosen preset framing visible so the match still feels natural once the episode is styled.
+
+Avoid exposing scopes, histograms, or per-frame color readouts in these previews.
