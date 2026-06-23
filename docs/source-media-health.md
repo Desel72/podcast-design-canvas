@@ -32,9 +32,13 @@ Use clear status labels:
 
 The summary should attach to speaker buckets so creators understand which person is affected.
 
+When a bucket becomes `audio-only usable` because a creator chose `mark as audio-only` in `docs/speaker-sync-repair.md`, the summary should keep that repair context visible instead of making the track look like a separate unexplained media failure.
+
 ## Preview
 
 Health checks should preview the actual problem when possible: show a dark frame, play a quiet sample, or jump to the missing section. Avoid forcing users to interpret technical file metadata.
+
+If the visible problem comes from drift, an early ending track, or duplicated audio across buckets, the next step should route to `docs/speaker-sync-repair.md` rather than trapping the creator in media-quality review.
 
 ## Maintainer Acceptance Notes
 

@@ -32,6 +32,8 @@ Use simple actions:
 
 The product should preview the repair on a real moment before applying it across the episode.
 
+When a creator chooses `mark as audio-only`, that decision should carry back into `docs/source-media-health.md` Readiness Summary so the affected speaker bucket shows a clear outcome before preset selection.
+
 ## Review Points
 
 After repair, show a small set of checkpoints:
@@ -43,6 +45,8 @@ After repair, show a small set of checkpoints:
 - any detected drift point
 
 Creators should not need to manually scrub the full timeline to trust the repair.
+
+After those checkpoints pass, the repaired state should return to `docs/episode-ingest-readiness.md` with the updated bucket confidence so creators can continue to preset styling without re-diagnosing the same sync problem.
 
 ## Maintainer Acceptance Notes
 
