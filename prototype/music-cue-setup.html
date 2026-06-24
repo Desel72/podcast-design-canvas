@@ -1,0 +1,648 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Music Cue Setup Prototype</title>
+    <style>
+      :root {
+        color-scheme: light;
+        --ink: #16211f;
+        --muted: #5e6b67;
+        --line: #d9e0dd;
+        --panel: #f7faf8;
+        --accent: #136f63;
+        --warn: #a15c00;
+        --block: #a52828;
+        --info: #2a4c8a;
+        font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      }
+
+      * { box-sizing: border-box; }
+      body { margin: 0; color: var(--ink); background: #ffffff; }
+      main { max-width: 1200px; margin: 0 auto; padding: 32px 20px 48px; }
+      h1, h2, h3, p { margin-top: 0; }
+      h1 { font-size: 32px; line-height: 1.1; margin-bottom: 8px; }
+      .lede { color: var(--muted); max-width: 780px; }
+
+      .workspace {
+        display: grid;
+        grid-template-columns: minmax(0, 1.45fr) minmax(320px, 0.85fr);
+        gap: 24px;
+        margin-top: 28px;
+      }
+
+      .panel {
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: var(--panel);
+        padding: 18px;
+      }
+
+      .cue-list,
+      .preview-contexts,
+      .issues,
+      .toolbar {
+        display: grid;
+        gap: 12px;
+      }
+
+      .cue-card,
+      .context-card,
+      .issue {
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: #ffffff;
+        padding: 14px;
+      }
+
+      .cue-card.active,
+      .context-card.active {
+        border-color: var(--accent);
+        box-shadow: 0 0 0 2px rgba(19, 111, 99, 0.12);
+      }
+
+      .card-head {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 12px;
+      }
+
+      .card-head strong,
+      .issue strong {
+        display: block;
+        margin-bottom: 4px;
+      }
+
+      .card-head span,
+      .cue-meta,
+      .context-card span,
+      .issue span,
+      label {
+        color: var(--muted);
+      }
+
+      .badge {
+        display: inline-flex;
+        align-items: center;
+        min-height: 28px;
+        border-radius: 999px;
+        padding: 0 11px;
+        font-size: 13px;
+        font-weight: 800;
+        white-space: nowrap;
+      }
+
+      .badge.ready { color: #075246; background: #dff5ef; }
+      .badge.review { color: #7a4400; background: #fff1d6; }
+      .badge.blocked { color: #8b1e1e; background: #ffe0e0; }
+      .badge.info { color: #2a4c8a; background: #e2ebfb; }
+
+      .cue-meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 10px;
+        font-size: 13px;
+      }
+
+      .cue-meta span {
+        display: inline-flex;
+        align-items: center;
+        min-height: 28px;
+        border-radius: 999px;
+        padding: 0 11px;
+        background: #eef2f0;
+      }
+
+      .controls {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 10px;
+        margin-top: 16px;
+      }
+
+      label {
+        display: grid;
+        gap: 6px;
+        font-size: 13px;
+      }
+
+      select {
+        width: 100%;
+        min-height: 40px;
+        border: 1px solid #bfcbc7;
+        border-radius: 6px;
+        background: #ffffff;
+        color: var(--ink);
+        font: inherit;
+        padding: 8px 10px;
+      }
+
+      .preview-frame {
+        position: relative;
+        overflow: hidden;
+        aspect-ratio: 16 / 9;
+        border-radius: 8px;
+        background:
+          linear-gradient(180deg, rgba(16, 24, 22, 0) 55%, rgba(16, 24, 22, 0.78)),
+          linear-gradient(135deg, #174f49, #315676 58%, #6d5d83);
+        border: 1px solid #d1dbd7;
+      }
+
+      .speaker-layout {
+        position: absolute;
+        inset: 14% 10% 18%;
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 4%;
+      }
+
+      .speaker {
+        position: relative;
+        overflow: hidden;
+        border-radius: 8px;
+        background: linear-gradient(160deg, #8bc8bd, #1b5f56);
+      }
+
+      .speaker.guest { background: linear-gradient(160deg, #a5b4da, #405074); }
+      .speaker::before {
+        content: "";
+        position: absolute;
+        top: 20%;
+        left: 50%;
+        width: 26%;
+        aspect-ratio: 1;
+        transform: translateX(-50%);
+        border-radius: 50%;
+        background: #eef7f4;
+      }
+      .speaker::after {
+        content: "";
+        position: absolute;
+        right: 29%;
+        bottom: 12%;
+        left: 29%;
+        height: 32%;
+        border-radius: 999px 999px 0 0;
+        background: #dcefeb;
+      }
+
+      .lower-third,
+      .caption,
+      .cue-chip {
+        position: absolute;
+        z-index: 3;
+        border-radius: 6px;
+      }
+
+      .lower-third {
+        left: 12px;
+        bottom: 56px;
+        background: rgba(16, 24, 22, 0.82);
+        color: #ffffff;
+        font-size: 12px;
+        font-weight: 800;
+        padding: 5px 8px;
+      }
+
+      .caption {
+        left: 12%;
+        right: 12%;
+        bottom: 12px;
+        background: rgba(16, 24, 22, 0.86);
+        color: #ffffff;
+        font-weight: 800;
+        line-height: 1.35;
+        padding: 9px 12px;
+        text-align: center;
+      }
+
+      .cue-chip {
+        left: 16px;
+        top: 16px;
+        display: inline-flex;
+        align-items: center;
+        min-height: 28px;
+        padding: 0 11px;
+        font-size: 12px;
+        font-weight: 800;
+        background: rgba(255, 255, 255, 0.92);
+        color: var(--ink);
+      }
+
+      .cue-chip.warn { background: #fff1d6; color: #7a4400; }
+
+      .summary-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 10px;
+        margin: 16px 0;
+      }
+
+      .summary-card {
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: #ffffff;
+        padding: 12px;
+      }
+
+      .summary-card strong {
+        display: block;
+        font-size: 24px;
+        line-height: 1;
+        margin-bottom: 4px;
+      }
+
+      .issue { border-left: 4px solid var(--warn); }
+      .issue.blocked { border-left-color: var(--block); }
+      .issue.info { border-left-color: var(--info); }
+
+      .toolbar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-top: 18px;
+      }
+
+      button {
+        min-height: 38px;
+        border: 1px solid #b9c8c3;
+        border-radius: 6px;
+        background: #ffffff;
+        color: var(--ink);
+        font: inherit;
+        font-weight: 700;
+        padding: 7px 11px;
+        cursor: pointer;
+      }
+
+      button.active {
+        border-color: var(--accent);
+        background: #def3ed;
+        color: var(--accent);
+      }
+
+      @media (max-width: 920px) {
+        .workspace,
+        .controls,
+        .summary-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>Music Cue Setup Prototype</h1>
+      <p class="lede">
+        Add approved cues to structural podcast moments, preview them against real episode context, and keep approval, placement, and re-validation inside one creator-facing workflow.
+      </p>
+
+      <section class="workspace">
+        <div class="panel">
+          <h2>Cue placements</h2>
+          <div class="cue-list" id="cueList"></div>
+
+          <h3 style="margin-top: 22px;">Cue controls</h3>
+          <div class="controls">
+            <label>
+              Cue source
+              <select id="sourceSelect"></select>
+            </label>
+            <label>
+              Review state
+              <select id="stateSelect"></select>
+            </label>
+            <label>
+              Start timing
+              <select id="timingSelect"></select>
+            </label>
+            <label>
+              Loudness
+              <select id="loudnessSelect"></select>
+            </label>
+            <label>
+              Template reuse
+              <select id="templateSelect"></select>
+            </label>
+            <label>
+              Export re-validation
+              <select id="revalidationSelect"></select>
+            </label>
+          </div>
+        </div>
+
+        <aside class="panel" aria-live="polite">
+          <h2>Preview context</h2>
+          <div class="preview-frame" id="previewFrame">
+            <div class="speaker-layout">
+              <div class="speaker host"></div>
+              <div class="speaker guest"></div>
+            </div>
+            <div class="lower-third" id="lowerThird">Host · Alex</div>
+            <div class="caption" id="captionLine">“We should open with the launch story, then go straight into the sponsor read.”</div>
+            <div class="cue-chip" id="cueChip">Cue preview</div>
+          </div>
+
+          <div class="summary-grid" id="summaryGrid"></div>
+
+          <h3>Preview moments</h3>
+          <div class="preview-contexts" id="contextList"></div>
+
+          <h3 style="margin-top: 20px;">Review notes</h3>
+          <div class="issues" id="issues"></div>
+
+          <div class="toolbar" id="toolbar"></div>
+        </aside>
+      </section>
+    </main>
+
+    <script>
+      const cues = [
+        {
+          id: "intro",
+          label: "Intro music",
+          purpose: "Open before the first spoken line without covering the host.",
+          source: "starter cue from a preset style",
+          state: "ready",
+          timing: "start earlier",
+          loudness: "quieter",
+          templateReuse: "save to template",
+          revalidation: "ready this export",
+          context: "Host intro",
+          caption: "“Welcome back — today we’re breaking down the launch story.”",
+          lowerThird: "Host · Alex",
+          previewNotes: [
+            "Intro should end before the first full sentence lands.",
+            "Template keeps the same cue purpose but re-checks it every export.",
+          ],
+          issues: [
+            ["info", "Usage approval confirmed", "This cue is approved for the finished episode and can stay attached to the intro placeholder."],
+          ],
+        },
+        {
+          id: "segment",
+          label: "Segment transition",
+          purpose: "Bridge the guest introduction into the main conversation.",
+          source: "saved show template cue",
+          state: "template cue needs review",
+          timing: "start later",
+          loudness: "standard",
+          templateReuse: "save to template",
+          revalidation: "file needs relink",
+          context: "Segment transition",
+          caption: "“Now that the guest is here, let’s break down what actually changed after launch.”",
+          lowerThird: "Guest · Maya",
+          previewNotes: [
+            "Transition should sit between the planned sections with both speakers visible.",
+            "Template cue needs review because chapter timing changed in this episode.",
+          ],
+          issues: [
+            ["review", "Template cue needs review", "This saved cue still matches the segment purpose, but the new chapter timing means the creator should preview it again."],
+            ["blocked", "Source file unavailable", "The saved transition file needs relinking before this export can treat the cue as ready."],
+          ],
+        },
+        {
+          id: "sponsor",
+          label: "Sponsor bed",
+          purpose: "Support the sponsor read without covering necessary speech.",
+          source: "sponsor-provided track",
+          state: "overlaps important speech",
+          timing: "keep timing",
+          loudness: "too prominent",
+          templateReuse: "episode only",
+          revalidation: "approval expired",
+          context: "Sponsor read",
+          caption: "“This episode is brought to you by Northlight — use the code in the show notes.”",
+          lowerThird: "Sponsor moment",
+          previewNotes: [
+            "Sponsor bed should sit under the read with captions and lower-thirds still clear.",
+            "Approval and source availability must re-check at export time.",
+          ],
+          issues: [
+            ["blocked", "Approval lapsed", "The sponsor-provided track no longer has usage approval for this export."],
+            ["review", "Speech overlap", "The sponsor bed currently makes the key promo phrase harder to hear."],
+          ],
+        },
+      ];
+
+      const stateOptions = [
+        "ready",
+        "missing usage approval",
+        "cue not placed",
+        "overlaps important speech",
+        "template cue needs review",
+        "unavailable file",
+      ];
+
+      const timingOptions = ["start earlier", "keep timing", "start later", "shorter", "longer fade"];
+      const loudnessOptions = ["quieter", "standard", "too prominent"];
+      const templateOptions = ["save to template", "episode only", "remove from episode"];
+      const revalidationOptions = ["ready this export", "approval expired", "file needs relink"];
+
+      let selectedCue = "intro";
+
+      const cueListEl = document.querySelector("#cueList");
+      const contextListEl = document.querySelector("#contextList");
+      const issuesEl = document.querySelector("#issues");
+      const summaryGridEl = document.querySelector("#summaryGrid");
+      const sourceSelectEl = document.querySelector("#sourceSelect");
+      const stateSelectEl = document.querySelector("#stateSelect");
+      const timingSelectEl = document.querySelector("#timingSelect");
+      const loudnessSelectEl = document.querySelector("#loudnessSelect");
+      const templateSelectEl = document.querySelector("#templateSelect");
+      const revalidationSelectEl = document.querySelector("#revalidationSelect");
+      const cueChipEl = document.querySelector("#cueChip");
+      const captionLineEl = document.querySelector("#captionLine");
+      const lowerThirdEl = document.querySelector("#lowerThird");
+      const toolbarEl = document.querySelector("#toolbar");
+
+      function selected() {
+        return cues.find((cue) => cue.id === selectedCue);
+      }
+
+      function toneForState(state) {
+        if (state === "ready") return "ready";
+        if (state === "missing usage approval" || state === "unavailable file") return "blocked";
+        return "review";
+      }
+
+      function createOptions(select, values) {
+        select.innerHTML = "";
+        values.forEach((value) => {
+          const option = document.createElement("option");
+          option.value = value;
+          option.textContent = value;
+          select.appendChild(option);
+        });
+      }
+
+      function syncControls() {
+        const cue = selected();
+        sourceSelectEl.innerHTML = "";
+        [
+          "uploaded music file",
+          "saved show template cue",
+          "starter cue from a preset style",
+          "sponsor-provided track",
+          "previously used show asset",
+        ].forEach((value) => {
+          const option = document.createElement("option");
+          option.value = value;
+          option.textContent = value;
+          sourceSelectEl.appendChild(option);
+        });
+        sourceSelectEl.value = cue.source;
+        stateSelectEl.value = cue.state;
+        timingSelectEl.value = cue.timing;
+        loudnessSelectEl.value = cue.loudness;
+        templateSelectEl.value = cue.templateReuse;
+        revalidationSelectEl.value = cue.revalidation;
+      }
+
+      function renderCueList() {
+        cueListEl.innerHTML = "";
+        cues.forEach((cue) => {
+          const article = document.createElement("article");
+          article.className = `cue-card${cue.id === selectedCue ? " active" : ""}`;
+          article.innerHTML = `
+            <div class="card-head">
+              <div>
+                <strong>${cue.label}</strong>
+                <span>${cue.purpose}</span>
+              </div>
+              <span class="badge ${toneForState(cue.state)}">${cue.state}</span>
+            </div>
+            <div class="cue-meta">
+              <span>${cue.source}</span>
+              <span>${cue.context}</span>
+              <span>${cue.revalidation}</span>
+            </div>
+          `;
+          article.addEventListener("click", () => {
+            selectedCue = cue.id;
+            syncControls();
+            render();
+          });
+          cueListEl.appendChild(article);
+        });
+      }
+
+      function renderPreview() {
+        const cue = selected();
+        cueChipEl.textContent = cue.label;
+        cueChipEl.className = `cue-chip${toneForState(cue.state) === "review" ? " warn" : ""}`;
+        captionLineEl.textContent = cue.caption;
+        lowerThirdEl.textContent = cue.lowerThird;
+      }
+
+      function renderSummary() {
+        const cue = selected();
+        summaryGridEl.innerHTML = `
+          <div class="summary-card">
+            <strong>${cue.context}</strong>
+            <span>current preview context</span>
+          </div>
+          <div class="summary-card">
+            <strong>${cue.source}</strong>
+            <span>active cue source</span>
+          </div>
+          <div class="summary-card">
+            <strong>${cue.templateReuse}</strong>
+            <span>template reuse scope</span>
+          </div>
+          <div class="summary-card">
+            <strong>${cue.revalidation}</strong>
+            <span>export re-validation state</span>
+          </div>
+        `;
+      }
+
+      function renderContexts() {
+        const cue = selected();
+        contextListEl.innerHTML = "";
+        cue.previewNotes.forEach((note, index) => {
+          const item = document.createElement("div");
+          item.className = `context-card${index === 0 ? " active" : ""}`;
+          item.innerHTML = `
+            <strong>${cue.context} preview ${index + 1}</strong>
+            <span>${note}</span>
+          `;
+          contextListEl.appendChild(item);
+        });
+      }
+
+      function renderIssues() {
+        issuesEl.innerHTML = "";
+        selected().issues.forEach(([tone, title, detail]) => {
+          const item = document.createElement("div");
+          item.className = `issue ${tone}`;
+          item.innerHTML = `<strong>${title}</strong><span>${detail}</span>`;
+          issuesEl.appendChild(item);
+        });
+      }
+
+      function renderToolbar() {
+        toolbarEl.innerHTML = "";
+        [
+          ["preview-here", "Preview here"],
+          ["renew-approval", "Renew approval"],
+          ["save-template", "Save to template"],
+          ["remove-cue", "Remove from episode"],
+        ].forEach(([id, label], index) => {
+          const button = document.createElement("button");
+          button.type = "button";
+          button.dataset.action = id;
+          button.textContent = label;
+          if (index === 0) button.className = "active";
+          toolbarEl.appendChild(button);
+        });
+      }
+
+      sourceSelectEl?.addEventListener("change", () => {
+        selected().source = sourceSelectEl.value;
+        render();
+      });
+      stateSelectEl?.addEventListener("change", () => {
+        selected().state = stateSelectEl.value;
+        render();
+      });
+      timingSelectEl?.addEventListener("change", () => {
+        selected().timing = timingSelectEl.value;
+        render();
+      });
+      loudnessSelectEl?.addEventListener("change", () => {
+        selected().loudness = loudnessSelectEl.value;
+        render();
+      });
+      templateSelectEl?.addEventListener("change", () => {
+        selected().templateReuse = templateSelectEl.value;
+        render();
+      });
+      revalidationSelectEl?.addEventListener("change", () => {
+        selected().revalidation = revalidationSelectEl.value;
+        render();
+      });
+
+      createOptions(stateSelectEl, stateOptions);
+      createOptions(timingSelectEl, timingOptions);
+      createOptions(loudnessSelectEl, loudnessOptions);
+      createOptions(templateSelectEl, templateOptions);
+      createOptions(revalidationSelectEl, revalidationOptions);
+      syncControls();
+
+      function render() {
+        renderCueList();
+        renderPreview();
+        renderSummary();
+        renderContexts();
+        renderIssues();
+        renderToolbar();
+      }
+
+      render();
+    </script>
+  </body>
+</html>
