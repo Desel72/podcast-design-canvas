@@ -144,6 +144,16 @@ assert.match(actionNote.textContent, /Caption review opened/);
 assert.strictEqual(markedStatus.textContent, "caption review open");
 assert.strictEqual(markedStatus.className, "badge review");
 
+// The caption hand-off opens the owning caption review screen, not just describes it.
+const captionLink = actionNote.children.find((child) => child.tagName === "a");
+assert.ok(captionLink, "caption hand-off renders a link to the owning screen");
+assert.strictEqual(captionLink.href, "audio-caption-quality-review.html");
+assert.match(captionLink.textContent, /caption quality review/);
+assert.ok(
+  fs.existsSync(path.join(__dirname, "audio-caption-quality-review.html")),
+  "the caption review hand-off target exists",
+);
+
 markPickup.click();
 assert.match(actionNote.textContent, /Pickup reminder selected/);
 assert.match(markedMoment.className, /\bactive\b/);

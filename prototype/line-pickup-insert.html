@@ -73,6 +73,10 @@
         color: var(--muted); padding: 11px 12px;
       }
       .action-note strong { display: block; color: var(--ink); margin-bottom: 4px; }
+      .action-note .fix-link {
+        display: inline-block; margin-top: 8px; color: var(--accent); font-weight: 700; text-decoration: none;
+      }
+      .action-note .fix-link:hover, .action-note .fix-link:focus-visible { text-decoration: underline; outline: none; }
       .moment.active { border-color: var(--accent); box-shadow: 0 0 0 2px rgba(15, 106, 87, 0.12); }
       button {
         min-height: 38px; border: 1px solid #b9c8c3; border-radius: 6px; background: #fff;
@@ -245,6 +249,7 @@
         caption: {
           title: "Caption review opened for replaced span",
           detail: "Only the pickup words reopen for caption review; the surrounding paragraph and other episode captions stay untouched.",
+          fixScreen: { file: "audio-caption-quality-review.html", label: "caption quality review" },
         },
       };
 
@@ -269,6 +274,15 @@
         const detail = document.createElement("span");
         detail.textContent = copy.detail;
         actionNoteElement.append(title, detail);
+        // The caption hand-off should open the owning caption review screen, not just
+        // describe it — so the creator can actually confirm the replaced words there.
+        if (copy.fixScreen) {
+          const open = document.createElement("a");
+          open.className = "fix-link";
+          open.href = copy.fixScreen.file;
+          open.textContent = `Open ${copy.fixScreen.label} →`;
+          actionNoteElement.append(open);
+        }
       }
 
       function ensureSeamPreview() {
