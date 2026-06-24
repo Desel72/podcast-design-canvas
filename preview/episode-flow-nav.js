@@ -15,6 +15,13 @@ const EPISODE_FLOW = [
 const EPISODE_SHELL_PREFIX = 2;
 const EPISODE_PREAMBLE = { file: "speaker-role-mapping.html", label: "Speaker roles" };
 const EPISODE_HANDOFF = { file: "episode-watch-through-preview.html", label: "Watch-through preview" };
+
+// Source media health is where the creator reviews each speaker's uploaded recording, so it
+// is the natural point in the guided episode flow to jump to the layout-first start and place
+// those videos — the same placement already offered from the ingest, style, speaker-setup, and
+// reuse steps.
+const LAYOUT_FIRST_PLACEMENT_STEP_FILE = "source-media-health.html";
+const LAYOUT_FIRST_PLACEMENT_FILE = "layout-first.html";
 const PREVIEW_APP_EPISODE_TARGETS = new Set([
   screenIdFromFile(EPISODE_PREAMBLE.file),
   ...EPISODE_FLOW.map((step) => screenIdFromFile(step.file)),
@@ -192,6 +199,30 @@ function setTopTargetWhenEmbedded(link) {
   if (isEmbeddedInPreviewApp()) {
     link.target = "_top";
   }
+}
+
+function layoutFirstPlacementSearch() {
+  const shellPath = new URLSearchParams(window.location.search).get("path");
+  const params = new URLSearchParams();
+  if (shellPath === "episode" || shellPath === "publish") {
+    params.set("path", shellPath);
+  }
+  params.set("from", "episode");
+  const search = params.toString();
+  return search ? `?${search}` : "";
+}
+
+function layoutFirstPlacementHref() {
+  return `../preview/${LAYOUT_FIRST_PLACEMENT_FILE}${layoutFirstPlacementSearch()}`;
+}
+
+function shouldOfferLayoutPlacement(step) {
+  return step && step.file === LAYOUT_FIRST_PLACEMENT_STEP_FILE;
+}
+
+function setLayoutPlacementLink(link) {
+  link.href = layoutFirstPlacementHref();
+  setTopTargetWhenEmbedded(link);
 }
 
 function setEpisodeScreenLink(link, file) {
@@ -376,6 +407,13 @@ function renderEpisodeFlowNav() {
   setTopTargetWhenEmbedded(app);
   app.textContent = "Preview app";
   wrap.appendChild(app);
+
+  if (shouldOfferLayoutPlacement(step)) {
+    const placement = document.createElement("a");
+    setLayoutPlacementLink(placement);
+    placement.textContent = "Place videos in layout";
+    wrap.appendChild(placement);
+  }
 
   if (previous) {
     const prevLink = document.createElement("a");
