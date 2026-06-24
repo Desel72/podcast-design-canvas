@@ -533,6 +533,17 @@
         return speaker.name.split(" — ")[0];
       }
 
+      function rollupOpenSpeakerLinkLabel(speaker) {
+        const bucket = bucketLabel(speaker);
+        const active = choices.filter((entry) => enabled.has(entry.id));
+        const primaryLabel = active[0]?.label?.toLowerCase();
+        if (!primaryLabel) return `Open ${bucket}`;
+        if (active.length === 1) {
+          return `Open ${bucket} · ${primaryLabel}`;
+        }
+        return `Open ${bucket} · ${primaryLabel} + ${active.length - 1} more`;
+      }
+
       function buildSummary() {
         const hasSuggested = speakers.some((speaker) => speaker.state === "suggested");
         if (hasSuggested) {
@@ -699,7 +710,7 @@
             const jump = document.createElement("button");
             jump.type = "button";
             jump.className = "secondary";
-            jump.textContent = `Open ${bucketLabel(speaker)}`;
+            jump.textContent = rollupOpenSpeakerLinkLabel(speaker);
             jump.addEventListener("click", () => focusSpeaker(speaker.id));
             links.appendChild(jump);
           }
