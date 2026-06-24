@@ -87,4 +87,8 @@ assert.strictEqual(M.canApplySimilar(2, three), false, "undecided 'review' sourc
 // 5. A propagated choice is valid for the kind and evaluates normally.
 assert.strictEqual(M.evaluate(after).results[p5].state, "cleaned", "shortened dead-air reads as cleaned");
 
+// 6. Moment cards carry plain-language guidance from the kind metadata.
+const deadAirGuidance = M.momentGuidanceCopy(M.kinds["dead-air"]);
+assert.ok(deadAirGuidance?.title && deadAirGuidance?.suggest, "dead-air kind includes card guidance copy");
+
 console.log("pause-crosstalk-cleanup (Apply to similar): all assertions passed");

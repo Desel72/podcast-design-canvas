@@ -286,6 +286,24 @@
         margin: 14px 0 0;
       }
 
+      .moment-guidance {
+        margin: 0;
+        padding: 10px 12px;
+        border-radius: 8px;
+        border: 1px solid var(--line);
+        background: #f7faf8;
+        color: var(--muted);
+        font-size: 12px;
+        line-height: 1.45;
+      }
+
+      .moment-guidance strong {
+        display: block;
+        color: var(--ink);
+        font-size: 12px;
+        margin-bottom: 4px;
+      }
+
       .moment-rollup {
         border: 1px solid var(--line);
         border-radius: 8px;
@@ -855,6 +873,32 @@
           .join("");
       }
 
+      function momentGuidanceCopy(kind) {
+        const title = typeof kind?.title === "string" && kind.title.length ? kind.title : null;
+        const suggest = typeof kind?.suggest === "string" && kind.suggest.length ? kind.suggest : null;
+        if (!title && !suggest) return null;
+        return { title, suggest };
+      }
+
+      function renderMomentGuidance(kind) {
+        const copy = momentGuidanceCopy(kind);
+        if (!copy) return null;
+
+        const guidance = document.createElement("p");
+        guidance.className = "moment-guidance";
+        if (copy.title) {
+          const strong = document.createElement("strong");
+          strong.textContent = copy.title;
+          guidance.appendChild(strong);
+        }
+        if (copy.suggest) {
+          const span = document.createElement("span");
+          span.textContent = copy.suggest;
+          guidance.appendChild(span);
+        }
+        return guidance;
+      }
+
       function renderMoment(moment, index, result, filteredOut = false) {
         const kind = kinds[moment.kind];
         const article = document.createElement("article");
@@ -891,6 +935,7 @@
             <label>What to do
               <select data-field="choice" aria-label="Cleanup choice">${choiceOptions}</select>
             </label>
+            <div data-guidance></div>
             ${canApplySimilar(index, moments)
               ? `<button type="button" class="secondary apply-similar" data-action="apply-similar">Apply to ${countSimilar(index, moments)} similar</button>`
               : ""}
@@ -898,6 +943,11 @@
         `;
 
         article.querySelector('[data-field="at"]').value = moment.at;
+        const guidanceHost = article.querySelector("[data-guidance]");
+        const guidance = renderMomentGuidance(kind);
+        if (guidanceHost && guidance) {
+          guidanceHost.appendChild(guidance);
+        }
         // The waveform tag shows the editable timestamp, so set it via textContent —
         // never interpolate a user-editable value into the innerHTML scaffold above.
         article.querySelector("[data-tag]").textContent = moment.at;
@@ -965,7 +1015,7 @@
       // Exported only for the committed Node test (pause-crosstalk-cleanup.test.js).
       // In the page `module` is undefined, so this block is skipped and nothing changes.
       if (typeof module !== "undefined" && module.exports) {
-        module.exports = { kinds, choices, sampleMoments, evaluate, similarToChange, canApplySimilar, countSimilar, applySimilar };
+        module.exports = { kinds, choices, sampleMoments, evaluate, similarToChange, canApplySimilar, countSimilar, applySimilar, momentGuidanceCopy };
       }
     </script>
   </body>
