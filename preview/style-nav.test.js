@@ -15,6 +15,7 @@ new vm.Script(navScript);
 assert.ok(navScript.includes('home.href = "../preview/"'), "style nav links back to the preview shell");
 assert.ok(navScript.includes("episode-flow.html"), "style nav links to the guided episode flow");
 assert.ok(navScript.includes("contextual-broll-moments.html"), "style nav hands off to contextual visuals");
+assert.ok(navScript.includes("speaker-eye-line-coherence.html"), "style nav links back to speaker setup");
 assert.ok(!/innerHTML/.test(navScript), "style nav builds the DOM without innerHTML");
 
 const styleScreens = [

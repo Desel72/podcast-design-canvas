@@ -112,6 +112,11 @@ function renderStyleNav() {
     prevLink.href = previous.file;
     prevLink.textContent = `Previous: ${previous.label}`;
     wrap.appendChild(prevLink);
+  } else {
+    const setup = document.createElement("a");
+    setup.href = "speaker-eye-line-coherence.html";
+    setup.textContent = "Previous: Speaker eye-line coherence";
+    wrap.appendChild(setup);
   }
 
   if (next) {
